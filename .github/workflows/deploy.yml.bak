@@ -1,0 +1,148 @@
+
+name: Java build
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven' 
+
+      - name: Verify Maven version
+        run: mvn -v 
+        
+      - name: Create settings.xml for Maven
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+            <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+                      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                      xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+              <servers>
+                <server>
+                  <id>maven-public</id>
+                  <username>${{secrets.NEXUS_USERNAME}}</username>
+                  <password>${{secrets.NEXUS_PASSWORD}}</password>
+                </server>
+              </servers>
+              <profiles>
+                <profile>
+                  <id>nexus</id>
+                  <repositories>
+                    <repository>
+                      <id>maven-public</id>
+                      <url>${{secrets.NEXUS_URL}}</url>
+                      <releases><enabled>true</enabled></releases>
+                      <snapshots><enabled>true</enabled></snapshots>
+                    </repository>
+                  </repositories>
+                  <pluginRepositories>
+                    <pluginRepository>
+                      <id>maven-public</id>
+                      <url>${{secrets.NEXUS_URL}}</url>
+                      <releases><enabled>true</enabled></releases>
+                      <snapshots><enabled>true</enabled></snapshots>
+                    </pluginRepository>
+                  </pluginRepositories>
+                </profile>
+              </profiles>
+              <activeProfiles>
+                <activeProfile>nexus</activeProfile>
+              </activeProfiles>
+            </settings>
+          EOF
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-       
+
+      - name: Check Maven version
+        run: mvn -v    
+
+      - name: Import Nexus certificate
+        run: |
+          echo "Adding Nexus cert to JVM truststore..."
+          echo "Installing Nexus certificate..."
+          CERT_PATH=".certs/nexus.crt"
+    
+          # Determine the actual cacerts location for this JDK
+          CACERTS=$JAVA_HOME/jre/lib/security/cacerts
+
+          echo "Using truststore: $CACERTS"
+
+          sudo keytool -importcert \
+            -trustcacerts \
+            -file "$CERT_PATH" \
+            -alias nexus-cert \
+            -keystore "$CACERTS" \
+            -storepass changeit \
+            -noprompt
+
+      - name: Build with Maven
+        run: mvn clean compile install
+
+      - name: Upload WAR via SFTP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "target/*.war"
+          target: "/opt/deployments"
+          strip_components: 1
+          overwrite: true
+          debug: true
+
+      - name: WildFly Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            WAR_NAME="mbs-workflow-softpos-management.war"
+            DEPLOY_PATH="/opt/deployments/$WAR_NAME"
+            SERVER_GROUP="prod-3rdpartygroup"
+            WILDFLY_HOME="/home/wildfly/wildfly-20.0.1.Final"
+            BACKUP_PATH="/opt/deployments/backups"
+            
+            DEPLOYMENT_EXISTS=$($WILDFLY_HOME/bin/jboss-cli.sh --connect --controller=127.0.0.1:9990 \
+            --commands="deployment-info --name=$WAR_NAME")
+
+              if echo "$DEPLOYMENT_EXISTS" | grep -q -E "enabled|OK"; then
+              echo "Deployment exists. Backing up WAR before redeploying..."
+               if [ -f "$DEPLOY_PATH" ]; then
+                TIMESTAMP=$(date +%Y%m%d%H%M%S)
+                 cp "$DEPLOY_PATH" "$BACKUP_PATH/${WAR_NAME}.${TIMESTAMP}.bak"
+              fi
+
+             echo "Redeploying with --force..."
+             $WILDFLY_HOME/bin/jboss-cli.sh --connect --controller=127.0.0.1:9990 \
+              --command="deploy $DEPLOY_PATH --name=$WAR_NAME --force"
+            else
+             echo "WAR is NOT deployed. Deploying to server group..."
+             $WILDFLY_HOME/bin/jboss-cli.sh --connect --controller=127.0.0.1:9990 \
+              --command="deploy $DEPLOY_PATH --server-groups=$SERVER_GROUP"
+            fi
+
+            

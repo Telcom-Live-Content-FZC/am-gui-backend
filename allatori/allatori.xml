@@ -1,0 +1,40 @@
+<config>
+    <input>
+            <jar in="C:\Users\iguest\git\mbs-workflow-softpos-management-v2\target\mbs-workflow-softpos-management-v2.war" out="C:\Users\iguest\git\mbs-workflow-softpos-management-v2\target\mbs-workflow-softpos-management-obs.war"/>
+      </input>
+    <classpath>
+            <jar name="C:\Users\iguest\git\mbs-workflow-softpos-management-v2\target\mbs-workflow-softpos-management-v2\WEB-INF\lib\*.jar"/>
+     </classpath>
+    <keep-names>
+        <class access="protected+">
+            <field access="protected+"/>
+            <method access="protected+"/>
+            
+                <class template="class mbs.workflow.am.user.management.controller.*"/>
+                <class template="class mbs.workflow.am.user.management.services.*"/>
+                <class template="class mbs.workflow.am.common.validation.*"/>
+                <class template="class mbs.workflow.am.user.management.dao.*"/>
+                <class template="class mbs.workflow.am.terminal.management.dao.*"/>
+            
+        </class>
+    </keep-names>
+       <property name="string-encryption" value="enable"/>
+       <property name="string-encryption-version" value="v4"/>
+       <property name="string-encryption-type" value="fast"/>
+       
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.common.*"/>
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.common.dao.*"/>
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.common.validation.*"/>
+       
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.device.management.dao.*"/>
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.terminal.management.dao.*"/>
+       <property name="string-encryption" value="enable" apply2class="class mbs.workflow.am.user.management.dao.*"/>
+     
+      <property name="packages-naming" value="abc"/>
+      <property name="fields-naming" value="compact"/>
+      <property name="methods-naming" value="compact"/>
+      <property name="log-file" value="allatori.log"/>
+    
+
+    
+</config>

@@ -1,0 +1,41 @@
+/target/
+
+# Ignore Allatori files
+allatori/allatori.log
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+.log
+.lock
+.project.gradle
+.project.apt_generated
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+hs_err_pid*
+
+# OS-specific
+.DS_Store # macOS
+Thumbs.db # Windows
