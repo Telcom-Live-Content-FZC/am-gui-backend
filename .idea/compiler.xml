@@ -6,15 +6,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="mbs-workflow-am-gui" />
         <module name="mbs-workflow-am" />
+        <module name="mbs-am-gui" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="mbs-am-gui" options="-Xlint:unchecked" />
       <module name="mbs-workflow-am" options="-Xlint:unchecked" />
-      <module name="mbs-workflow-am-gui" options="-Xlint:unchecked" />
     </option>
   </component>
 </project>

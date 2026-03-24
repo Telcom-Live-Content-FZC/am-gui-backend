@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>mbs.workflow</groupId>
-	<artifactId>mbs-workflow-am-gui</artifactId>
+	<artifactId>mbs-am-gui</artifactId>
 	<version>0.0.1</version>
 	<packaging>war</packaging>
-	<name>mbs-workflow-am-gui-service</name>
+	<name>mbs-am-gui</name>
 	<parent>
 		<groupId>com.psi.common</groupId>
 		<artifactId>common-libs</artifactId>
@@ -103,26 +103,6 @@
 	</build>
 	<dependencies>
 		<dependency>
-			<groupId>com.psi.common</groupId>
-			<artifactId>util</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.psi.common</groupId>
-			<artifactId>db</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.psi.common</groupId>
-			<artifactId>transactions</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.psi.common</groupId>
-			<artifactId>crypto</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jboss.spec.javax.ejb</groupId>
 			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
 			<!-- <scope>provided</scope> -->
@@ -180,11 +160,6 @@
 			<version>0.9.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.76</version>
-		</dependency>
-		<dependency>
 			<groupId>com.psi.mfsv4.mbs</groupId>
 			<artifactId>mbs-common</artifactId>
 			<version>1.0.0</version>
@@ -198,11 +173,6 @@
 					<artifactId>util</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.persistence</groupId>
-			<artifactId>org.eclipse.persistence.moxy</artifactId>
-			<scope>compile</scope>
 		</dependency>
 
 		<dependency>
@@ -231,31 +201,6 @@
 			<groupId>org.jboss.spec.javax.interceptor</groupId>
 			<artifactId>jboss-interceptors-api_1.2_spec</artifactId>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.futurex</groupId>
-			<artifactId>futurex-client-sdk</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk18on</artifactId>
-			<version>1.76</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk18on</artifactId>
-			<version>1.76</version>
-		</dependency>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcutil-jdk18on</artifactId>
-			<version>1.76</version>
-		</dependency>
-		<dependency>
-			<groupId>com.itextpdf</groupId>
-			<artifactId>itextpdf</artifactId>
-			<version>5.5.13.3</version>
 		</dependency>
 		<!--<dependency>
 			<groupId>mbs.workflow</groupId>

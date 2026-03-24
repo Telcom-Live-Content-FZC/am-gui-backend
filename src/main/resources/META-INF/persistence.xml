@@ -7,19 +7,19 @@
                 <persistence-unit name="AttestationPU" transaction-type="JTA">
                 <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
                 <jta-data-source>java:jboss/datasources/DbClient</jta-data-source>
-                <class>mbs.workflow.am.gui.entity.RiskEvaluationEntity</class>
-                <class>mbs.workflow.am.gui.entity.RiskEvaluationDetailEntity</class>
-                    <class>mbs.workflow.am.gui.entity.DeviceEntity</class>
-                    <class>mbs.workflow.am.gui.entity.DeviceKeyEntity</class>
-                    <class>mbs.workflow.am.gui.entity.PolicyHistoryEntity</class>
-                    <class>mbs.workflow.am.gui.entity.RiskConfigEntity</class>
-                    <class>mbs.workflow.am.gui.entity.RiskEvaluationDetailEntity</class>
-                    <class>mbs.workflow.am.gui.entity.RiskEvaluationEntity</class>
-                    <class>mbs.workflow.am.gui.entity.SignalCatalogEntity</class>
-                    <class>mbs.workflow.am.gui.entity.SignalPolicyEntity</class>
-                    <class>mbs.workflow.am.gui.entity.TenantEntity</class>
-                    <class>mbs.workflow.am.gui.entity.TenantConfigEntity</class>
-                    <class>mbs.workflow.am.gui.entity.TenantKeyRegistryEntity</class>
+                <class>mbs.am.gui.entity.RiskEvaluationEntity</class>
+                <class>mbs.am.gui.entity.RiskEvaluationDetailEntity</class>
+                    <class>mbs.am.gui.entity.DeviceEntity</class>
+                    <class>mbs.am.gui.entity.DeviceKeyEntity</class>
+                    <class>mbs.am.gui.entity.PolicyHistoryEntity</class>
+                    <class>mbs.am.gui.entity.RiskConfigEntity</class>
+                    <class>mbs.am.gui.entity.RiskEvaluationDetailEntity</class>
+                    <class>mbs.am.gui.entity.RiskEvaluationEntity</class>
+                    <class>mbs.am.gui.entity.SignalCatalogEntity</class>
+                    <class>mbs.am.gui.entity.SignalPolicyEntity</class>
+                    <class>mbs.am.gui.entity.TenantEntity</class>
+                    <class>mbs.am.gui.entity.TenantConfigEntity</class>
+                    <class>mbs.am.gui.entity.TenantKeyRegistryEntity</class>
 
 
 
