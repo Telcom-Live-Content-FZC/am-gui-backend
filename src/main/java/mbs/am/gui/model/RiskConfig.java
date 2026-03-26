@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class RiskConfig {
 
-    private String tenantId;
+    private Long tenantId;
     private Integer monitorWindowHours;
     private boolean isEngineEnabled;
     private String updatedBy;

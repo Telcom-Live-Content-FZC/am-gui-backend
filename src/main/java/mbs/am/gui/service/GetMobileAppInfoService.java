@@ -4,6 +4,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -42,15 +43,12 @@ public class GetMobileAppInfoService extends AbstractRequest {
         tres.setRequestId(context.getPayload().getRequestId());
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
         try {
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+
             String packageName = context.getRequest().getQueryParams("package-name");
 
-            List<MobileAppInfoEntity> entities;
-
-            if (packageName != null && !packageName.trim().isEmpty()) {
-                entities = appRepo.findByPackageName(packageName);
-            } else {
-                entities = appRepo.findAll();
-            }
+            List<MobileAppInfoEntity> entities = appRepo.findByTenantAndPackageName(tenantId, packageName);
 
             List<MobileAppInfoResponse> listOfMobileApps = entities.stream()
                     .map(mapper::toModel)
@@ -58,9 +56,9 @@ public class GetMobileAppInfoService extends AbstractRequest {
                     .collect(Collectors.toList());
 
             if (listOfMobileApps.isEmpty()) {
-                tres.setStatus(String.valueOf(HttpStatus.SC_BAD_REQUEST));
-                tres.setDescription("No data found");
-                return createHttpResponse(tres, HttpStatus.SC_BAD_REQUEST);
+                tres.setStatus(String.valueOf(HttpStatus.SC_NOT_FOUND));
+                tres.setDescription("No mobile application data found for the given criteria.");
+                return createHttpResponse(tres, HttpStatus.SC_NOT_FOUND);
             }
 
             ext.put("apps", listOfMobileApps);

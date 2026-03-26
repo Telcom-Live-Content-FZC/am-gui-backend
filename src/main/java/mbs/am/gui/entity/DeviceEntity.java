@@ -7,22 +7,28 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.io.Serializable;
+
 
 @Entity
-@Table(name = "TBLDEVICES_BK")
+@Table(name = "TBLDEVICES", uniqueConstraints = {
+        @UniqueConstraint(name = "UK_DEVICE_TENANT", columnNames = {"TENANT_ID", "DEVICE_ID"})
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeviceEntity {
+public class DeviceEntity implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "device_seq")
-    @SequenceGenerator(name = "device_seq", sequenceName = "TBLDEVICES_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Long id;
 
-    @Column(name = "DEVICEID", nullable = false, length = 50, unique = true)
+    @Column(name = "TENANT_ID", nullable = false)
+    private Long tenantId;
+
+    @Column(name = "DEVICE_ID", nullable = false, length = 100)
     private String deviceId;
 
     @Column(name = "MANUFACTURER", length = 250)
@@ -31,20 +37,15 @@ public class DeviceEntity {
     @Column(name = "MODEL", length = 250)
     private String model;
 
-    @Column(name = "OS", length = 250)
+    @Column(name = "OS", length = 50)
     private String os;
 
-    @Column(name = "OSVERSION", length = 250)
+    @Column(name = "OSVERSION", length = 50)
     private String osVersion;
 
-    @Column(name = "ROOTED", length = 25)
+    @Column(name = "ROOTED", length = 1)
     @Builder.Default
-    private String rooted = "NO";
-
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "TIMESTAMP")
-    @Builder.Default
-    private Date timestamp = new Date();
+    private String rooted = "N";
 
     @Column(name = "LABEL", length = 250)
     private String label;
@@ -53,7 +54,7 @@ public class DeviceEntity {
     @Builder.Default
     private Integer attestationEnabled = 1;
 
-    @Column(name = "STATUS", length = 10)
+    @Column(name = "STATUS", length = 20)
     @Builder.Default
     private String status = "ACTIVE";
 

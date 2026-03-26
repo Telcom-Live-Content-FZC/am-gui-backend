@@ -5,6 +5,8 @@ import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
 import lombok.var;
+import mbs.am.gui.common.SystemUtil;
+import mbs.am.gui.exception.ExceptionFactory;
 import mbs.softpos.common.*;
 import mbs.softpos.common.dto.RequestContext;
 import mbs.softpos.common.dto.TransactionResponse;
@@ -17,10 +19,8 @@ import org.apache.http.HttpStatus;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @JBossLog
 @Stateless
@@ -39,43 +39,41 @@ public class DashBoardService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
-            String tenantId = context.getRequest().getQueryParams("tenant-id");
-            String daysBack = context.getRequest().getQueryParams("days-back");
-
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+            int daysBack = SystemUtil.parseIntSafely(context.getRequest().getQueryParams("days-back"))
+                    .orElse(7);
             LocalDateTime endDate = LocalDateTime.now();
-            LocalDateTime startDate = endDate.minusDays(Integer.parseInt(daysBack));
+            LocalDateTime startDate = endDate.minusDays(daysBack);
 
             List<ActionAccount> actionResults = riskEvaluationRepository.getActionCounts(tenantId, startDate, endDate);
 
-            long allowed = 0, blocked = 0, quarantined = 0, total = 0;
+            long total = actionResults.stream().mapToLong(ActionAccount::getCount).sum();
 
-            for (ActionAccount actionAccount : actionResults) {
-                String action = actionAccount.getFinalAction();
-                long count = actionAccount.getCount();
-                total += count;
+            long allowed = actionResults.stream()
+                    .filter(a -> "ALLOW".equals(a.getFinalAction()))
+                    .mapToLong(ActionAccount::getCount).findFirst().orElse(0L);
 
-                if ("ALLOW".equals(action)) allowed = count;
-                else if ("BLOCK_DEVICE".equals(action)) blocked = count;
-                else if ("QUARANTINE".equals(action)) quarantined = count;
-            }
+            long blocked = actionResults.stream()
+                    .filter(a -> "BLOCK_DEVICE".equals(a.getFinalAction()))
+                    .mapToLong(ActionAccount::getCount).findFirst().orElse(0L);
+
+            long quarantined = actionResults.stream()
+                    .filter(a -> "QUARANTINE".equals(a.getFinalAction()))
+                    .mapToLong(ActionAccount::getCount).findFirst().orElse(0L);
 
             double blockRate = (total == 0) ? 0.0 : ((double) blocked / total) * 100.0;
 
-            // 2. Fetch Top Threats
             List<TopThreat> threatResults = riskEvaluationRepository.getTopThreats(tenantId, startDate, endDate, 5);
-            List<TopThreat> topThreats = new ArrayList<>();
 
-            for (TopThreat topThreat : threatResults) {
-                String policyKey = topThreat.getKey();
-                String description = topThreat.getDescription();
-                long triggerCount = topThreat.getTriggerCount();
+            List<TopThreat> topThreats = threatResults.stream()
+                    .map(t -> TopThreat.builder()
+                            .key(t.getKey())
+                            .description(t.getDescription())
+                            .triggerCount(t.getTriggerCount())
+                            .build())
+                    .collect(Collectors.toList());
 
-                topThreats.add(TopThreat.builder()
-                        .key(policyKey)
-                        .description(description)
-                        .triggerCount(triggerCount)
-                        .build());
-            }
             var dashBoardSummary = DashboardSummary.builder()
                     .totalEvaluations(total)
                     .allowedCount(allowed)
@@ -103,14 +101,14 @@ public class DashBoardService extends AbstractRequest {
     @Override
     protected String[] required() {
         // TODO Auto-generated method stub
-        return new String[] {};
+        return new String[]{};
 
     }
 
     @Override
     protected String[] requiredHeader() {
         // TODO Auto-generated method stub
-        return new String[] {};
+        return new String[]{};
     }
 
     @Override

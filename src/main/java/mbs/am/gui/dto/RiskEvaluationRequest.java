@@ -2,6 +2,7 @@ package mbs.am.gui.dto;
 
 import lombok.Builder;
 import lombok.Data;
+
 import java.util.Map;
 
 @Data
@@ -9,7 +10,7 @@ import java.util.Map;
 public class RiskEvaluationRequest {
 
     @Builder.Default
-    private String tenantId = "DEFAULT";
+    private String tenantId = "1";
     private String requestId;
     private String deviceId;
     private String os;

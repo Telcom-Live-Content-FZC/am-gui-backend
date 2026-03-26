@@ -1,6 +1,8 @@
 package mbs.am.gui.entity;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 

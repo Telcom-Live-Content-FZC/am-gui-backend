@@ -4,6 +4,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.JsonDataExtractor;
 import mbs.softpos.common.MessageId;
@@ -45,15 +46,13 @@ public class MobileAppInfoUpdateService extends AbstractRequest {
         tres.setRequestId(context.getPayload().getRequestId());
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
         try {
-            String appIdStr = context.getRequest().getPathParams().get(1);
+            Long appId = SystemUtil.parseLongSafely(context.getRequest().getPathParams().get(1)).orElse(null);
 
-            if (appIdStr == null || appIdStr.trim().isEmpty()) {
+            if (appId == null) {
                 tres.setStatus(String.valueOf(HttpStatus.SC_BAD_REQUEST));
                 tres.setDescription("App-id is required");
                 return createHttpResponse(tres, HttpStatus.SC_BAD_REQUEST);
             }
-
-            long appId = Long.parseLong(appIdStr);
 
             Optional<MobileAppInfoEntity> existingEntity = appRepo.findById(appId);
             if (!existingEntity.isPresent()) {

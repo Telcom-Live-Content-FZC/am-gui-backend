@@ -1,6 +1,5 @@
 package mbs.am.gui.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RiskEvaluationDetailDto {
+    private String version;
     @SerializedName("policy-name")
     private String policyName;
     @SerializedName("score")

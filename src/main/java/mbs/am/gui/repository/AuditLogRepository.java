@@ -1,4 +1,6 @@
 package mbs.am.gui.repository;
+
+
 import mbs.am.gui.entity.AuditLogEntity;
 import mbs.am.gui.mapper.AuditLogMapper;
 

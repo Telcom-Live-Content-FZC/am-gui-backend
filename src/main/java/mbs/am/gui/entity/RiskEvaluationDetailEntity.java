@@ -22,6 +22,9 @@ public class RiskEvaluationDetailEntity {
     @Column(name = "POLICY_NAME", nullable = false)
     private String policyName;
 
+    @Column(name = "VERSION", nullable = false)
+    private String version;
+
     @Column(name = "APPLIED_SCORE", nullable = false)
     private Integer appliedScore;
 }

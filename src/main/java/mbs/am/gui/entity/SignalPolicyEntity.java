@@ -1,6 +1,8 @@
 package mbs.am.gui.entity;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -16,12 +18,15 @@ public class SignalPolicyEntity {
     private Long id;
 
     @Column(name = "TENANT_ID", nullable = false, length = 50)
-    private String tenantId;
+    private Long tenantId;
 
     // Relationship back to the Catalog
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "KEY", referencedColumnName = "KEY", nullable = false)
     private SignalCatalogEntity catalog;
+
+    @Column(name = "VERSION", nullable = false, length = 20)
+    private String version;
 
     @Column(name = "DATA_TYPE", nullable = false, length = 20)
     private String dataType;

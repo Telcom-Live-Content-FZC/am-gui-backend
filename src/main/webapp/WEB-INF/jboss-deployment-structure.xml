@@ -9,8 +9,7 @@
 	        <module name="org.apache.cxf" />
 	        <module name="org.apache.cxf.impl" />
 	        <module name="org.glassfish.javax.json" />
-	        <module name="com.google.code.gson"/>
-	        
+			<module name="mbs.workflow.softpos.common" export="true" services="import"/>
 	    </dependencies>
     </deployment>
 </jboss-deployment-structure>

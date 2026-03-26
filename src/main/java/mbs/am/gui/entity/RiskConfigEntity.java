@@ -2,7 +2,11 @@ package mbs.am.gui.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import javax.persistence.*;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,7 +16,7 @@ import java.time.LocalDateTime;
 public class RiskConfigEntity {
     @Id
     @Column(name = "TENANT_ID", length = 50)
-    private String tenantId;
+    private Long tenantId;
 
     @Column(name = "MONITOR_WINDOW_HOURS", nullable = false)
     private Integer monitorWindowHours;

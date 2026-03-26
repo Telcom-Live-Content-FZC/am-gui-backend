@@ -1,9 +1,10 @@
 package mbs.am.gui.mapper;
 
-import mbs.am.gui.domain.RiskEvaluation;
+
 import mbs.am.gui.dto.RiskEvaluationResponse;
 import mbs.am.gui.entity.RiskEvaluationDetailEntity;
 import mbs.am.gui.entity.RiskEvaluationEntity;
+import mbs.am.gui.model.RiskEvaluation;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;

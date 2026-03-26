@@ -14,7 +14,8 @@ public class PolicyResponse {
 
     private Long id;
     @SerializedName("tenant-id")
-    private String tenantId;
+    private Long tenantId;
+    private String version;
     @SerializedName("policy-name")
     private String key;
     private String description;

@@ -7,10 +7,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class SignalCatalog {
-    private String key;
-    private String category;
-    private String description;
+@NoArgsConstructor
+public class RiskEvaluationDetail {
+
+    private String policyName;
+    private String version;
+    private Integer appliedScore;
+
 }

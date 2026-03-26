@@ -3,6 +3,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -38,17 +39,20 @@ public class EvaluationLogDetailService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
-            // 1. Extract Parameters
-            String tenantId = context.getRequest().getQueryParams("tenant-id");
-            String evaluationId = context.getRequest().getQueryParams("evaluation-id");
 
-            if (evaluationId == null || evaluationId.isEmpty()) {
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+            Optional<Long> evalIdOpt = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("evaluation-id"));
+
+            if (!evalIdOpt.isPresent()) {
                 tres.setStatus(String.valueOf(HttpStatus.SC_BAD_REQUEST));
-                tres.setDescription("evaluation-id is required");
+                tres.setDescription("A valid numeric evaluation-id is required");
                 return createHttpResponse(tres, HttpStatus.SC_BAD_REQUEST);
             }
-            long longEvaluationId = Long.parseLong(evaluationId);
-            Optional<RiskEvaluationEntity> evaluationEntity = riskEvaluationRepository.getEvaluationById(longEvaluationId, tenantId);
+            long evaluationId = evalIdOpt.get();
+
+            Optional<RiskEvaluationEntity> evaluationEntity =
+                    riskEvaluationRepository.getEvaluationById(evaluationId, tenantId);
 
             if (!evaluationEntity.isPresent()) {
                 tres.setStatus(String.valueOf(HttpStatus.SC_NOT_FOUND));
@@ -57,10 +61,8 @@ public class EvaluationLogDetailService extends AbstractRequest {
             }
             RiskEvaluationEntity entity = evaluationEntity.get();
 
-            // 3. Fetch the Triggered Rules from the detail table
-            List<TriggeredRule> rules = riskEvaluationRepository.getTriggeredRulesForEvaluation(longEvaluationId);
+            List<TriggeredRule> rules = riskEvaluationRepository.getTriggeredRulesForEvaluation(evaluationId);
 
-            // 4. Assemble
             EvaluationDetailResponse detailDto = EvaluationDetailResponse.builder()
                     .evaluationId(entity.getId().toString())
                     .evaluationTime(entity.getEvaluationTime())
@@ -70,7 +72,6 @@ public class EvaluationLogDetailService extends AbstractRequest {
                     .triggeredRules(rules)
                     .build();
 
-            // 5. Build Final Response
             ext.put("evaluation-detail", detailDto);
 
             tres.setExtendedData(ext);

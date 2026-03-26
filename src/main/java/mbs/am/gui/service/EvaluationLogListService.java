@@ -4,6 +4,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -35,25 +36,30 @@ public class EvaluationLogListService extends AbstractRequest {
         tres.setRequestId(context.getPayload().getRequestId());
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
         try {
-            // 1. Extract Query Parameters
-            String tenantId = context.getRequest().getQueryParams("tenant-id");
-            String deviceId = context.getRequest().getQueryParams("device-id"); // Optional
-            String action = context.getRequest().getQueryParams("action");       // Optional
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+            String deviceId = context.getRequest().getQueryParams("device-id");
+            String action = context.getRequest().getQueryParams("action");
 
-            // Safe parsing for pagination with defaults
-            String pageParam = context.getRequest().getQueryParams("page");
-            String limitParam = context.getRequest().getQueryParams("limit");
 
-            int page = (pageParam != null) ? Integer.parseInt(pageParam) : 1;
-            int limit = (limitParam != null) ? Integer.parseInt(limitParam) : 50;
+
+            int page = SystemUtil.parseIntSafely(context.getRequest().getQueryParams("page"))
+                    .filter(p -> p > 0)
+                    .orElse(1);
+
+            int limit = SystemUtil.parseIntSafely(context.getRequest().getQueryParams("limit"))
+                    .filter(l -> l > 0 && l <= 100)
+                    .orElse(50);
+
             int offset = (page - 1) * limit;
 
-            // 2. Fetch Data
             List<EvaluationLog> logs = riskEvaluationRepository.getEvaluationLogs(
-                    tenantId, deviceId, action, offset, limit
+                    tenantId,
+                    SystemUtil.isNotBlank(deviceId) ? deviceId : null,
+                    SystemUtil.isNotBlank(action) ? action : null,
+                    offset, limit
             );
 
-            // 3. Build Response
             ext.put("evaluations", logs);
             ext.put("page", page);
             ext.put("limit", limit);

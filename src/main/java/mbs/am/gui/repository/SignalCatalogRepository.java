@@ -1,5 +1,6 @@
 package mbs.am.gui.repository;
 
+
 import mbs.am.gui.entity.SignalCatalogEntity;
 
 import javax.ejb.Stateless;

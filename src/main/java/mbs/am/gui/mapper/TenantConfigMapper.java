@@ -1,5 +1,6 @@
 package mbs.am.gui.mapper;
 
+
 import mbs.am.gui.dto.TenantConfigDto;
 import mbs.am.gui.entity.TenantConfigEntity;
 import mbs.am.gui.model.TenantConfig;

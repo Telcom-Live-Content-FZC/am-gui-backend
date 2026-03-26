@@ -6,7 +6,6 @@ import mbs.am.gui.entity.TenantEntity;
 import mbs.am.gui.entity.TenantKeyRegistryEntity;
 import mbs.am.gui.model.Tenant;
 
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.Collections;

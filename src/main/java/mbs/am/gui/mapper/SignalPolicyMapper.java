@@ -1,5 +1,8 @@
 package mbs.am.gui.mapper;
+
+
 import mbs.am.gui.dto.PolicyResponse;
+import mbs.am.gui.dto.PolicySaveRequest;
 import mbs.am.gui.entity.SignalCatalogEntity;
 import mbs.am.gui.entity.SignalPolicyEntity;
 import mbs.am.gui.model.SignalPolicy;
@@ -14,7 +17,8 @@ public class SignalPolicyMapper {
         return SignalPolicy.builder()
                 .id(entity.getId())
                 .tenantId(entity.getTenantId())
-                .signalKey(entity.getCatalog() != null ? entity.getCatalog().getKey() : null)
+                .version(entity.getVersion())
+                .key(entity.getCatalog() != null ? entity.getCatalog().getKey() : null)
                 .description(entity.getCatalog() != null ? entity.getCatalog().getDescription() : null)
                 .category(entity.getCatalog() != null ? entity.getCatalog().getCategory() : null)
                 .dataType(entity.getDataType())
@@ -34,10 +38,11 @@ public class SignalPolicyMapper {
         SignalPolicyEntity entity = new SignalPolicyEntity();
         entity.setId(model.getId());
         entity.setTenantId(model.getTenantId());
+        entity.setVersion(model.getVersion());
 
-        if (model.getSignalKey() != null) {
+        if (model.getKey() != null) {
             SignalCatalogEntity catalogRef = new SignalCatalogEntity();
-            catalogRef.setKey(model.getSignalKey());
+            catalogRef.setKey(model.getKey());
             entity.setCatalog(catalogRef);
         }
 
@@ -60,7 +65,8 @@ public class SignalPolicyMapper {
         return PolicyResponse.builder()
                 .id(model.getId())
                 .tenantId(model.getTenantId())
-                .key(model.getSignalKey())
+                .version(model.getVersion())
+                .key(model.getKey())
                 .description(model.getDescription())
                 .dataType(model.getDataType())
                 .operator(model.getOperator())
@@ -70,6 +76,25 @@ public class SignalPolicyMapper {
                 .priority(model.getPriority())
                 .messageId(model.getMessageId())
                 .status(model.getStatus())
+                .build();
+    }
+    public SignalPolicy toModel(PolicySaveRequest request) {
+        if (request == null) return null;
+
+        return SignalPolicy.builder()
+                .tenantId(request.getTenantId())
+                .version(request.getVersion())
+                .key(request.getKey())
+                .dataType(request.getDataType())
+                .operator(request.getOperator())
+                .expectedValue(request.getExpectedValue())
+                .riskWeight(request.getRiskWeight())
+                .action(request.getAction())
+                .priority(request.getPriority())
+                .messageId(request.getMessageId())
+                .status(request.getStatus())
+                .updatedAt(null)
+                .createdAt(null)
                 .build();
     }
 }

@@ -5,6 +5,7 @@ import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
 import lombok.var;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.JsonDataExtractor;
 import mbs.softpos.common.MessageId;
@@ -43,10 +44,6 @@ public class PolicyUpdateService extends AbstractRequest {
     @Inject
     private SignalPolicyMapper mapper;
 
-    @Inject
-    private ExceptionFactory exceptionFactory;
-
-
     @Override
     @Interceptors(TransactionInterceptor.class)
     public HttpResponse execute(RequestContext context) {
@@ -57,11 +54,12 @@ public class PolicyUpdateService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
-            long policyId = Long.parseLong(context.getRequest().getPathParams().get(1));
+            Optional<Long> policyIdOtp = SystemUtil.parseLongSafely(context.getRequest().getPathParams().get(1));
+            Long policyId = policyIdOtp.get();
             Map<String, Object> request = JsonDataExtractor.toMap(context.getPayload().getExtendedData());
             PolicySaveRequest policySaveRequest = JsonDataExtractor.fromJson(JsonDataExtractor.toJson(request), PolicySaveRequest.class);
 
-            String tenantId = policySaveRequest.getTenantId();
+            Long tenantId = policySaveRequest.getTenantId();
 
             // 1. Fetch the existing ENTITY (This is now a "Managed" JPA Object)
             Optional<SignalPolicyEntity> optionalEntity = policyRepository.findByIdAndTenant(policyId, tenantId);
@@ -129,7 +127,7 @@ public class PolicyUpdateService extends AbstractRequest {
         }
     }
 
-    private void createAndSaveHistory(String tenantId, Long policyId, String field, String oldVal, String newVal, String changedBy) {
+    private void createAndSaveHistory(Long tenantId, Long policyId, String field, String oldVal, String newVal, String changedBy) {
         var policyHistory = PolicyHistoryEntity.builder()
                 .tenantId(tenantId)
                 .policyId(policyId)

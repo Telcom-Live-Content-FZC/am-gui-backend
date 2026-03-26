@@ -13,8 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class SignalPolicy {
     private Long id;
-    private String tenantId;
-    private String signalKey; // Flattened for easy access
+    private Long tenantId;
+    private String version;
+    private String key; // Flattened for easy access
     private String category;
     private String description;
     private String dataType;

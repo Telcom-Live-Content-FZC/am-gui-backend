@@ -5,6 +5,7 @@ import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
 import lombok.var;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -35,15 +36,23 @@ public class TopThreatsService extends AbstractRequest {
         tres.setRequestId(context.getPayload().getRequestId());
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
         try {
-            String tenantId = context.getRequest().getQueryParams("tenant-id");
-            int daysBack = Integer.parseInt(context.getRequest().getQueryParams("days-back"));
-            int limit = Integer.parseInt(context.getRequest().getQueryParams("limit"));
+
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+
+            int daysBack = SystemUtil.parseIntSafely(context.getRequest().getQueryParams("days-back"))
+                    .filter(d -> d > 0)
+                    .orElse(7);
+
+            int limit = SystemUtil.parseIntSafely(context.getRequest().getQueryParams("limit"))
+                    .filter(l -> l > 0 && l <= 100)
+                    .orElse(10);
+
 
             LocalDateTime endDate = LocalDateTime.now();
             LocalDateTime startDate = endDate.minusDays(daysBack);
-            int safeLimit = (limit > 0 && limit <= 100) ? limit : 10;
 
-            var listOfTopThreats =  riskEvaluationRepository.getTopThreats(tenantId, startDate, endDate, safeLimit);
+            var listOfTopThreats =  riskEvaluationRepository.getTopThreats(tenantId, startDate, endDate, limit);
             ext.put("top-threats", listOfTopThreats);
             tres.setExtendedData(ext);
             tres.setStatus(PaymentStatus.SUCCESS);

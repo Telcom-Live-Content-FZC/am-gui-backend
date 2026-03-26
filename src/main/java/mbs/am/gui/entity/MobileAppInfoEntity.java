@@ -1,4 +1,5 @@
 package mbs.am.gui.entity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,10 @@ public class MobileAppInfoEntity {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "PACKAGE_NAME", nullable = false, length = 50)
+    @Column(name = "TENANT_ID", nullable = false)
+    private Long tenantId;
+
+    @Column(name = "PACKAGE_NAME", nullable = false, length = 100) // Updated length to 100
     private String packageName;
 
     @Column(name = "MIN_VERSION", length = 25)
@@ -31,9 +35,11 @@ public class MobileAppInfoEntity {
     @Column(name = "SIGNATURE", length = 250)
     private String signature;
 
-    @Column(name = "PLAY_INTEGRITY_ENABLED")
-    private Integer playIntegrityEnabled; // 1 = Enabled, 0 = Disabled
+    @Column(name = "PLAY_INTEGRITY_ENABLED", nullable = false)
+    @Builder.Default
+    private Integer playIntegrityEnabled = 1; // 1 = Enabled, 0 = Disabled
 
-    @Column(name = "STATUS", length = 10)
-    private String status; // 'ACTIVE' or 'INACTIVE'
+    @Column(name = "STATUS", length = 20)
+    @Builder.Default
+    private String status = "ACTIVE"; // 'ACTIVE' or 'INACTIVE'
 }

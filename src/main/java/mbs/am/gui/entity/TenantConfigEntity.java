@@ -1,6 +1,7 @@
 package mbs.am.gui.entity;
 
 import lombok.*;
+
 import javax.persistence.*;
 
 @Entity

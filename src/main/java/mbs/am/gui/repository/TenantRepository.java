@@ -1,6 +1,8 @@
 package mbs.am.gui.repository;
 
+
 import mbs.am.gui.entity.TenantEntity;
+
 import javax.ejb.Stateless;
 import javax.persistence.NoResultException;
 import java.util.List;

@@ -1,6 +1,9 @@
-package mbs.am.gui.domain;
+package mbs.am.gui.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.List;
 public class RiskEvaluation {
 
     private String requestId;
-    private String tenantId;
+    private Long tenantId;
     private String deviceId;
     private String signingKey;
     private Integer totalRiskScore;

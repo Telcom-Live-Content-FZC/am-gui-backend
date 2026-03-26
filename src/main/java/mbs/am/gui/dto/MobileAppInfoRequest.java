@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MobileAppInfoRequest {
+    @SerializedName("tenant-id")
+    private Long tenantId;
     @SerializedName("package-name")
     private String packageName;
     @SerializedName("min-version")

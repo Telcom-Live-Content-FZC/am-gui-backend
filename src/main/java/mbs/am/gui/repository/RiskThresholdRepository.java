@@ -1,5 +1,6 @@
 package mbs.am.gui.repository;
 
+
 import mbs.am.gui.entity.RiskThresholdEntity;
 
 import javax.ejb.Stateless;
@@ -12,7 +13,7 @@ public class RiskThresholdRepository extends BaseRepository<RiskThresholdEntity,
         super(RiskThresholdEntity.class);
     }
 
-    public List<RiskThresholdEntity> findActiveByTenant(String tenantId) {
+    public List<RiskThresholdEntity> findActiveByTenant(Long tenantId) {
         return em.createQuery(
                         "SELECT t FROM RiskThresholdEntity t " +
                                 "WHERE t.tenantId = :tenantId AND t.status = 1 " +

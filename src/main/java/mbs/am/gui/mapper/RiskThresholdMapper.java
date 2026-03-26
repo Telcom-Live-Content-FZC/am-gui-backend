@@ -1,5 +1,7 @@
 package mbs.am.gui.mapper;
 
+
+
 import mbs.am.gui.entity.RiskThresholdEntity;
 import mbs.am.gui.model.RiskThreshold;
 

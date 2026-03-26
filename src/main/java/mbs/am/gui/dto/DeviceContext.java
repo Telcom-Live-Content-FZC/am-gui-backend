@@ -1,6 +1,5 @@
 package mbs.am.gui.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
 import lombok.Data;

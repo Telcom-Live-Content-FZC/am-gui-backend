@@ -4,6 +4,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -18,10 +19,7 @@ import org.apache.http.HttpStatus;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @JBossLog
@@ -43,14 +41,25 @@ public class GetDeviceService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
+            // 1. Extract parameters
             String deviceId = context.getRequest().getQueryParams("device-id");
+            String tenantIdStr = context.getRequest().getQueryParams("tenant-id");
+
+            Optional<Long> tenandId = SystemUtil.parseLongSafely(tenantIdStr);
+            boolean hasDeviceId = SystemUtil.isNotBlank(deviceId);
 
             List<DeviceEntity> entities;
 
-            if (deviceId != null && !deviceId.trim().isEmpty()) {
+            if (tenandId.isPresent() && hasDeviceId) {
+                entities = deviceRepository.findByTenantAndDeviceId(tenandId.get(), deviceId)
+                        .map(Collections::singletonList)
+                        .orElseGet(Collections::emptyList);
+
+            } else if (hasDeviceId) {
                 entities = deviceRepository.findByDeviceId(deviceId)
                         .map(Collections::singletonList)
                         .orElseGet(Collections::emptyList);
+
             } else {
                 entities = deviceRepository.findAll();
             }

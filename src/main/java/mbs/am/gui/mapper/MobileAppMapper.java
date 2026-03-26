@@ -1,5 +1,7 @@
 package mbs.am.gui.mapper;
 
+
+
 import mbs.am.gui.dto.MobileAppInfoRequest;
 import mbs.am.gui.dto.MobileAppInfoResponse;
 import mbs.am.gui.entity.MobileAppInfoEntity;
@@ -9,10 +11,12 @@ import javax.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class MobileAppMapper {
+
     public MobileAppInfo toModel(MobileAppInfoEntity entity) {
         if (entity == null) return null;
         return MobileAppInfo.builder()
                 .id(entity.getId())
+                .tenantId(entity.getTenantId()) // Map Tenant ID
                 .packageName(entity.getPackageName())
                 .minVersion(entity.getMinVersion())
                 .maxVersion(entity.getMaxVersion())
@@ -21,9 +25,12 @@ public class MobileAppMapper {
                 .status(entity.getStatus())
                 .build();
     }
+
     public MobileAppInfo toModel(MobileAppInfoRequest request) {
         if (request == null) return null;
         return MobileAppInfo.builder()
+                // Safely handle Tenant ID if provided in the request payload, otherwise fallback
+                .tenantId(request.getTenantId() != null ? request.getTenantId() : 1L)
                 .packageName(request.getPackageName())
                 .minVersion(request.getMinVersion())
                 .maxVersion(request.getMaxVersion())
@@ -37,6 +44,7 @@ public class MobileAppMapper {
         if (model == null) return null;
         return MobileAppInfoEntity.builder()
                 .id(model.getId())
+                .tenantId(model.getTenantId()) // Map Tenant ID
                 .packageName(model.getPackageName())
                 .minVersion(model.getMinVersion())
                 .maxVersion(model.getMaxVersion())
@@ -50,6 +58,7 @@ public class MobileAppMapper {
         if (model == null) return null;
         return MobileAppInfoResponse.builder()
                 .id(model.getId())
+                 .tenantId(model.getTenantId())
                 .packageName(model.getPackageName())
                 .minVersion(model.getMinVersion())
                 .maxVersion(model.getMaxVersion())

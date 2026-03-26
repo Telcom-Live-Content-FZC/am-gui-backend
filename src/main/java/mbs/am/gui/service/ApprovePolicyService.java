@@ -1,85 +1,79 @@
 package mbs.am.gui.service;
 
 import com.psi.mfsv4.mbs.common.http.HttpResponse;
-import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
 import mbs.am.gui.common.SystemUtil;
+import mbs.am.gui.common.TransactionInterceptor;
+import mbs.am.gui.entity.SignalPolicyEntity;
+import mbs.am.gui.exception.MessageLookupService;
+import mbs.am.gui.mapper.SignalPolicyMapper;
+import mbs.am.gui.model.PolicyState;
+import mbs.am.gui.model.SignalPolicy;
+import mbs.am.gui.repository.SignalPolicyRepository;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.JsonDataExtractor;
 import mbs.softpos.common.MessageId;
-import mbs.softpos.common.Messages;
 import mbs.softpos.common.dto.RequestContext;
 import mbs.softpos.common.dto.TransactionResponse;
-import mbs.am.gui.common.TransactionInterceptor;
-import mbs.am.gui.dto.TenantDto;
-import mbs.am.gui.entity.TenantEntity;
-import mbs.am.gui.mapper.TenantMapper;
-import mbs.am.gui.model.Tenant;
-import mbs.am.gui.repository.TenantRepository;
 import org.apache.http.HttpStatus;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.interceptor.Interceptors;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+
 @JBossLog
 @Stateless
-public class TenantUpdateService extends AbstractRequest {
+public class ApprovePolicyService extends AbstractRequest {
 
     @EJB
-    private TenantRepository tenantRepository;
+    private SignalPolicyRepository policyRepository;
 
     @Inject
-    private TenantMapper mapper;
+    private MessageLookupService messageLookupService;
 
     @Override
     @Interceptors(TransactionInterceptor.class)
     public HttpResponse execute(RequestContext context) {
         TransactionResponse tres = new TransactionResponse();
-        ExtendedData ext = new ExtendedData();
-
         tres.setRequestId(context.getPayload().getRequestId());
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
-
         try {
-            Optional<Long> id = SystemUtil.parseLongSafely(context.getRequest().getPathParams().get(1));
+            Long tenantId = SystemUtil.parseLongSafely(context.getPayload().getExtendedData().get("tenant-id")).orElse(null);
+            String version = (String) context.getPayload().getExtendedData().get("version");
 
-            Map<String, Object> request = JsonDataExtractor.toMap(context.getPayload().getExtendedData());
-            TenantDto tenantRequest = JsonDataExtractor.fromJson(JsonDataExtractor.toJson(request), TenantDto.class);
+            Optional<Integer> currentStatusOpt = policyRepository.getVersionStatus(tenantId, version);
 
-            Optional<TenantEntity> optionalTenant = tenantRepository.findById(id.get());
-            if (!optionalTenant.isPresent()) {
+            if (!currentStatusOpt.isPresent()) {
                 tres.setStatus(String.valueOf(HttpStatus.SC_NOT_FOUND));
-                tres.setDescription("Tenant not found.");
+                tres.setDescription("Validation Failed: Version " + version + " does not exist.");
                 return createHttpResponse(tres, HttpStatus.SC_NOT_FOUND);
             }
+            PolicyState currentState = PolicyState.fromCode(currentStatusOpt.get());
 
-            TenantEntity oldTenant = optionalTenant.get();
+            if (currentState != PolicyState.PENDING) {
+                tres.setStatus(String.valueOf(HttpStatus.SC_BAD_REQUEST));
+                tres.setDescription("Validation Failed:  Version " + version + " is currently " + currentState.name() + ".");
+                return createHttpResponse(tres, HttpStatus.SC_BAD_REQUEST);
+            }
 
-            Tenant updateModel = mapper.fromDto(tenantRequest);
-            updateModel.setId(oldTenant.getId());
-
-            TenantEntity entityToUpdate = mapper.toEntity(updateModel);
-
-            entityToUpdate.setCreatedAt(oldTenant.getCreatedAt());
-
-            TenantEntity savedEntity = tenantRepository.save(entityToUpdate);
-
-            ext.put("tenant", mapper.toDto(mapper.fromEntity(savedEntity)));
-            tres.setExtendedData(ext);
+            policyRepository.archiveCurrentActive(tenantId);
+            policyRepository.updateStatusByVersion(tenantId, version, PolicyState.ACTIVE.getCode());
+            tres.setDescription("Version " + version + " is now ACTIVE. Previous version ARCHIVED.");
             tres.setStatus(PaymentStatus.SUCCESS);
-            tres.setDescription("Tenant updated successfully");
-
             return createHttpResponse(tres);
+
         } catch (Exception e) {
             captureException(e);
             tres.setStatus(String.valueOf(MessageId.ERR_MESSAGE));
-            tres.setDescription(Messages.getErrorMessage(MessageId.ERR_MESSAGE));
+            tres.setDescription(messageLookupService.getFormattedError(MessageId.ERR_MESSAGE).getMessage());
             return createHttpResponse(tres, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }

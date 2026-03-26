@@ -5,6 +5,7 @@ import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
 
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -43,20 +44,21 @@ public class TenantPoliciesService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
-            String rawTenantId = context.getRequest().getQueryParams("tenant-id");
-            String tenantId = (rawTenantId != null) ? rawTenantId.toUpperCase() : null;
+            Long tenantId = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"))
+                    .orElse(null);
+            String version = SystemUtil.defaultIfBlank(context.getRequest().getQueryParams("version"),null);
+            Integer status =  SystemUtil.parseIntSafely(context.getRequest().getQueryParams("status")).orElse(null);
 
-            List<SignalPolicyEntity> entities;
-            if (tenantId == null || tenantId.trim().isEmpty()) {
-                entities = policyRepository.findAllCrossTenant();
-            } else {
-                entities = policyRepository.findAllByTenant(tenantId);
-            }
+            List<SignalPolicyEntity> entities = policyRepository.findPolicies(tenantId, version, status);
 
-            if (entities == null || entities.isEmpty()) {
-                tres.setStatus(String.valueOf(HttpStatus.SC_BAD_REQUEST));
-                tres.setDescription("tenant-id not found or no policies available.");
-                return createHttpResponse(tres, HttpStatus.SC_BAD_REQUEST);
+            if (entities.isEmpty()) {
+                String message = String.format("No policies found matching criteria (Tenant: %s, Version: %s, Status: %s)",
+                        (tenantId == null ? "Global" : tenantId),
+                        (version == null ? "All" : version),
+                        (status == null ? "All" : status));
+                tres.setStatus(String.valueOf(HttpStatus.SC_NOT_FOUND));
+                tres.setDescription(message);
+                return createHttpResponse(tres, HttpStatus.SC_NOT_FOUND);
             }
 
             List<PolicyResponse> responses = entities.stream()
@@ -74,7 +76,7 @@ public class TenantPoliciesService extends AbstractRequest {
         } catch (Exception e) {
             captureException(e);
             tres.setStatus(String.valueOf(MessageId.ERR_MESSAGE));
-            tres.setDescription(Messages.getErrorMessage(MessageId.ERR_MESSAGE));
+            tres.setDescription("Internal Server Error: " + e.getMessage());
             return createHttpResponse(tres, HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
     }

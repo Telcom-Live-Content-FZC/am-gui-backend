@@ -9,7 +9,8 @@ import java.io.Serializable;
 public class PolicySaveRequest implements Serializable {
 
     @SerializedName("tenant-id")
-    private String tenantId;
+    private Long tenantId;
+    private String version;
     @SerializedName("policy-name")
     private String key;
     @SerializedName("data-type")
@@ -21,6 +22,8 @@ public class PolicySaveRequest implements Serializable {
     private Integer riskWeight;
     private String action;
     private Integer priority;
+    @SerializedName("message-id")
+    private Integer messageId;
     private Integer status;
     @SerializedName("updated-by")
     private String updatedBy;

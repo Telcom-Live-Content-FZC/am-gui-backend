@@ -1,4 +1,6 @@
 package mbs.am.gui.mapper;
+
+
 import mbs.am.gui.entity.SignalCatalogEntity;
 import mbs.am.gui.model.SignalCatalog;
 

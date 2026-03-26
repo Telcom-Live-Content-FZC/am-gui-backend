@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*; // Sticking with javax based on your JBoss version
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data

@@ -1,8 +1,10 @@
 package mbs.am.gui.entity;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -20,7 +22,7 @@ public class PolicyHistoryEntity {
     private Long id;
 
     @Column(name = "TENANT_ID", length = 50)
-    private String tenantId;
+    private Long tenantId;
 
     @Column(name = "POLICY_ID", nullable = false)
     private Long policyId;

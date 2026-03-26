@@ -18,13 +18,13 @@ public class RiskEvaluationEntity {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "REQUESTID", nullable = false, unique = true)
+    @Column(name = "REQUEST_ID", nullable = false, unique = true)
     private String requestId;
 
     @Column(name = "TENANT_ID", nullable = false, length = 50)
-    private String tenantId;
+    private Long tenantId;
 
-    @Column(name = "DEVICEID", nullable = false)
+    @Column(name = "DEVICE_ID", nullable = false)
     private String deviceId;
 
     @Column(name = "TOTAL_RISK_SCORE")

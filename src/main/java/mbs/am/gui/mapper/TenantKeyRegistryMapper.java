@@ -1,16 +1,29 @@
 package mbs.am.gui.mapper;
 
+import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.KeyUtils;
 import mbs.am.gui.dto.TenantKeyRegistryDto;
 import mbs.am.gui.entity.TenantKeyRegistryEntity;
 import mbs.am.gui.model.TenantKeyRegistry;
+import mbs.am.gui.repository.SystemConfigRepository;
+import mbs.softpos.common.EncryptionUtils;
 
+import javax.ejb.EJB;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@JBossLog
 public class TenantKeyRegistryMapper {
+
+    @Inject
+    private EncryptionUtils encryptionUtils;
+
+    @EJB
+    private SystemConfigRepository systemConfig;
 
     // ========================
     // MODEL -> ENTITY
@@ -42,15 +55,30 @@ public class TenantKeyRegistryMapper {
     public TenantKeyRegistry fromEntity(TenantKeyRegistryEntity entity) {
         if (entity == null) return null;
 
-        return TenantKeyRegistry.builder()
+        TenantKeyRegistry model = TenantKeyRegistry.builder()
                 .id(entity.getId())
+                .tenantId(entity.getTenant() != null ? entity.getTenant().getId() : null)
                 .kid(entity.getKid())
                 .algorithm(entity.getAlgorithm())
                 .publicKey(entity.getPublicKey())
-                .privateKeyEncrypted(entity.getPrivateKey()) // keep internal
+                .privateKeyEncrypted(entity.getPrivateKey())
                 .expiresAt(entity.getExpiresAt())
                 .status(entity.getStatus())
                 .build();
+
+        // Decrypt the Private Key for the signing engine
+        try {
+            String masterEncKey = systemConfig.getByNameOrDefault("jwt.db.encryption.key", "DEFAULT_CHANGE_ME");
+            String decrypted = encryptionUtils.decrypt(entity.getPrivateKey(), masterEncKey);
+
+            // Assuming KeyUtils is a helper you have for parsing PKCS8/PEM
+            model.setCachedPrivateKey(KeyUtils.parsePrivateKey(decrypted));
+
+        } catch (Exception e) {
+            log.errorf("CRITICAL: Failed to decrypt or parse JWT key for KID: %s", entity.getKid());
+        }
+
+        return model;
     }
 
     public List<TenantKeyRegistry> fromEntities(List<TenantKeyRegistryEntity> entities) {

@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MobileAppInfoResponse {
     private Long id;
+    @SerializedName("tenant-id")
+    private Long tenantId;
     @SerializedName("package-name")
     private String packageName;
     @SerializedName("min-version")

@@ -1,7 +1,5 @@
 package mbs.am.gui.mapper;
-
-
-import mbs.am.gui.domain.RiskEvaluationDetail;
+import mbs.am.gui.model.RiskEvaluationDetail;
 import mbs.am.gui.dto.RiskEvaluationDetailDto;
 import mbs.am.gui.entity.RiskEvaluationDetailEntity;
 
@@ -15,6 +13,7 @@ public class RiskEvaluationDetailMapper {
         if (model == null) return null;
 
         RiskEvaluationDetailEntity entity = new RiskEvaluationDetailEntity();
+        entity.setVersion(model.getVersion());
         entity.setPolicyName(model.getPolicyName());
         entity.setAppliedScore(model.getAppliedScore());
         return entity;
@@ -24,6 +23,7 @@ public class RiskEvaluationDetailMapper {
         if (model == null) return null;
 
         return RiskEvaluationDetailDto.builder()
+                .version(model.getVersion())
                 .policyName(model.getPolicyName())
                 .appliedScore(model.getAppliedScore())
                 .build();

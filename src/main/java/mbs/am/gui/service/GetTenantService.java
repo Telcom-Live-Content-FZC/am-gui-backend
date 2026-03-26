@@ -4,6 +4,7 @@ import com.psi.mfsv4.mbs.common.http.HttpResponse;
 import com.psi.mfsv4.mbs.common.objects.ExtendedData;
 import com.psi.mfsv4.mbs.common.objects.PaymentStatus;
 import lombok.extern.jbosslog.JBossLog;
+import mbs.am.gui.common.SystemUtil;
 import mbs.softpos.common.AbstractRequest;
 import mbs.softpos.common.MessageId;
 import mbs.softpos.common.Messages;
@@ -40,15 +41,15 @@ public class GetTenantService extends AbstractRequest {
         tres.setTransactionId(context.getRequest().getHeader("referenceid"));
 
         try {
-            String tenantId = context.getRequest().getQueryParams("tenant-id");
-            List<TenantEntity> entities = tenantId != null && !tenantId.trim().isEmpty() ?
-                     tenantRepository.findById(Long.parseLong(tenantId))
-                             .map(Collections::singletonList)
-                             .orElseGet(Collections::emptyList) : tenantRepository.findAll();
+            Optional<Long> tenantIdOpt = SystemUtil.parseLongSafely(context.getRequest().getQueryParams("tenant-id"));
 
-            if (entities == null || entities.isEmpty()) {
+            List<TenantEntity> entities = tenantIdOpt.map(tenantId -> tenantRepository.findById(tenantId)
+                    .map(Collections::singletonList)
+                    .orElse(Collections.emptyList())).orElseGet(() -> tenantRepository.findAll());
+
+            if (entities.isEmpty()) {
                 tres.setStatus(String.valueOf(HttpStatus.SC_NOT_FOUND));
-                tres.setDescription("Tenant(s) not found.");
+                tres.setDescription("No tenant data found.");
                 return createHttpResponse(tres, HttpStatus.SC_NOT_FOUND);
             }
 
